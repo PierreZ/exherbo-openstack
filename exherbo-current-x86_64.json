@@ -1,0 +1,60 @@
+{
+  "builders": [
+    {
+      "accelerator": "kvm",
+      "boot_command": [
+        "<down><down><down><down><down><down><down><down><down><down><down><enter>",
+        "<enter>",
+        "<wait10>",
+        "<enter>",
+        "<wait10>",
+        "<enter>",
+        "<wait10>",
+        "<enter>",
+        "killall -9 sshd<enter><wait>"
+      ],
+      "boot_wait": "5s",
+      "disk_interface": "virtio-scsi",
+      "disk_size": 5000,
+      "disk_cache": "unsafe",
+      "disk_discard": "unmap",
+      "disk_compression": false,
+      "iso_skip_cache": true,
+      "format": "qcow2",
+      "headless": true,
+      "http_directory": "http",
+      "iso_urls": [ "https://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/4.7.1/systemrescuecd-x86-4.7.1.iso/download" ],
+      "net_device": "virtio-net",
+      "output_directory": "output/exherbo-base-x86_64-qemu/",
+      "machine_type": "pc-i440fx-1.7",
+      "qemuargs": [
+        [
+          "-m",
+          "512"
+        ]
+      ],
+      "shutdown_command": "systemctl poweroff",
+      "ssh_password": "packer",
+      "ssh_username": "root",
+      "ssh_wait_timeout": "1200s",
+      "type": "qemu",
+      "vm_name": "exherbo-base-x86_64"
+    }
+  ],
+  
+  "provisioners": [
+    {
+      "scripts": [
+        "scripts/base.sh"
+      ],
+      "type": "shell"
+    },
+    {
+      "scripts": [
+        "scripts/cleanup.sh"
+      ],
+      "pause_before": "30s",
+      "type": "shell"
+    },
+  ]
+}
