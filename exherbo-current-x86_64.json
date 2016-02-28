@@ -1,6 +1,8 @@
 {
   "builders": [
     {
+      "iso_checksum_url":"http://dev.exherbo.org/stages/sha1sum",
+      "iso_checksum":"sha1",
       "accelerator": "kvm",
       "boot_command": [
         "<down><down><down><down><down><down><down><down><down><down><down><enter>",
@@ -12,6 +14,7 @@
         "<wait10>",
         "<enter>",
         "killall -9 sshd<enter><wait>"
+        "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/base.sh -O /tmp/install.sh ; chmod +x /tmp/install.sh ; /tmp/install.sh<enter>"
       ],
       "boot_wait": "5s",
       "disk_interface": "virtio-scsi",
@@ -22,7 +25,7 @@
       "iso_skip_cache": true,
       "format": "qcow2",
       "headless": true,
-      "http_directory": "http",
+      "http_directory": "script",
       "iso_urls": [ "https://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/4.7.1/systemrescuecd-x86-4.7.1.iso/download" ],
       "net_device": "virtio-net",
       "output_directory": "output/exherbo-base-x86_64-qemu/",
@@ -39,15 +42,6 @@
       "ssh_wait_timeout": "1200s",
       "type": "qemu",
       "vm_name": "exherbo-base-x86_64"
-    }
-  ],
-  
-  "provisioners": [
-    {
-      "scripts": [
-        "script/base.sh"
-      ],
-      "type": "shell"
     }
   ]
 }
