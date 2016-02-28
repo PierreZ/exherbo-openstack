@@ -29,7 +29,7 @@
       "iso_urls": [ "https://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/4.7.1/systemrescuecd-x86-4.7.1.iso/download" ],
       "net_device": "virtio-net",
       "output_directory": "output",
-      "machine_type": "pc-i440fx-1.7",
+      "machine_type": "pc",
       "qemuargs": [
         [
           "-m",
@@ -39,7 +39,7 @@
       "shutdown_command": "systemctl poweroff",
       "ssh_password": "packer",
       "ssh_username": "root",
-      "ssh_wait_timeout": "1200s",
+      "ssh_wait_timeout": "3600s",
       "type": "qemu",
       "vm_name": "exherbo-base-x86_64"
     }
