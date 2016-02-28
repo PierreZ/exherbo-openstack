@@ -17,10 +17,6 @@ ROOTDEVDEVICE="$ROOTDEV$ROOTDEVICE"
 
 ETC_CONFD_HOSTNAME="exherbo"
 
-ETC_TIMEZONE="GMT"
-
-cfdisk $ROOTDEV
-
 # Creating disk
 sed -e 's/\t\([\+0-9a-zA-Z]*\)[ \t].*/\1/' << EOF | fdisk $ROOTDEV
   o # clear the in memory partition table
