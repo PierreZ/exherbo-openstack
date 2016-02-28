@@ -45,7 +45,7 @@
   "provisioners": [
     {
       "scripts": [
-        "scripts/base.sh"
+        "script/base.sh"
       ],
       "type": "shell"
     },
