@@ -54,8 +54,15 @@ nameserver 8.8.4.4
 EOF
 
 # Chroot
-env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) /mnt/exherbo /bin/bash
+chroot /mnt/exherbo /bin/bash -ex<<EOF
 source /etc/profile
+
+# Enable SSH
+systemctl enable sshd.service
+sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
+systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=exherbo --root-password=packer --setup-machine-id
+ssh-keygen -A
+EOF
 
 # Paludis
 cd /etc/paludis && vim bashrc && vim *conf
@@ -80,4 +87,12 @@ cat<<EOF > /boot/grub/grub.cfg
  }
 EOF
 
-# TODO: config systemd
+# Flush files, umount and reboot
+sync
+umount /mnt/exherbo/sys/
+umount /mnt/exherbo/proc/
+umount /mnt/exherbo/dev/pts
+umount -l /mnt/exherbo/dev/
+umount -l /mnt/exherbo/
+sync
+reboot
