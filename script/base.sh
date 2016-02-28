@@ -17,17 +17,15 @@ ROOTDEVDEVICE="$ROOTDEV$ROOTDEVICE"
 
 ETC_CONFD_HOSTNAME="exherbo"
 
-# Creating disk
-sed -e 's/\t\([\+0-9a-zA-Z]*\)[ \t].*/\1/' << EOF | fdisk $ROOTDEV
-  o # clear the in memory partition table
-  n # new partition
-  p # primary partition
-  1 # partition number 1
-    # default - start at beginning of disk 
-    # default - start at beginning of disk 
-  w # write the partition table
-  q # and we're done
-EOF
+# Create partition 
+echo "o
+n
+p
+1
+
+
+w
+"|fdisk /dev/sda
 
 mkfs.ext4 $ROOTDEVDEVICE
 mkdir /mnt/exherbo && mount /dev/sda1 /mnt/exherbo && cd /mnt/exherbo;
