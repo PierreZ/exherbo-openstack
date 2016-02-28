@@ -28,7 +28,7 @@
       "http_directory": "script",
       "iso_urls": [ "https://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/4.7.1/systemrescuecd-x86-4.7.1.iso/download" ],
       "net_device": "virtio-net",
-      "output_directory": "output/exherbo-base-x86_64-qemu/",
+      "output_directory": "output",
       "machine_type": "pc-i440fx-1.7",
       "qemuargs": [
         [
