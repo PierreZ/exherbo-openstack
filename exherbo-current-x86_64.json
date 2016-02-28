@@ -48,13 +48,6 @@
         "script/base.sh"
       ],
       "type": "shell"
-    },
-    {
-      "scripts": [
-        "scripts/cleanup.sh"
-      ],
-      "pause_before": "30s",
-      "type": "shell"
     }
   ]
 }
