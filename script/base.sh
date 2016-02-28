@@ -64,7 +64,8 @@ cd /etc/paludis && vim bashrc && vim *conf
 cave sync
 
 # Let's compile our kernel!
-mkdir -p /usr/src && git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux
+mkdir -p /usr/src && cd /usr/src
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux
 make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- menuconfig
 make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu-
 make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- modules_install
