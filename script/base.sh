@@ -1,6 +1,11 @@
 #/bin/bash
 set -e;
 
+# if one day, I need to change kernel options, here a sed command:
+#sed -ir 's/^(CONFIG_XXX=.*|# CONFIG_XXX is not set)/CONFIG_XXX=m/;
+#         s/^(CONFIG_FOO=.*|# CONFIG_FOO is not set)/CONFIG_FOO=m/;
+#         s/^(CONFIG_BAR=.*|# CONFIG_BAR is not set)/CONFIG_BAR=m/' .config
+
 # http://exherbo.org/docs/install-guide.html
 
 # Stage URl
@@ -53,17 +58,9 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
-# Chroot
+# Start Chroot
 chroot /mnt/exherbo /bin/bash -ex<<EOF
 source /etc/profile
-
-# Enable SSH
-systemctl enable sshd.service
-sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
-systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=exherbo --root-password=packer --setup-machine-id
-ssh-keygen -A
-EOF
-
 # Paludis
 cd /etc/paludis && vim bashrc && vim *conf
 cave sync
@@ -71,14 +68,25 @@ cave sync
 # Let's compile our kernel!
 mkdir -p /usr/src && cd /usr/src
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux
-make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- menuconfig
+make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- x86_64_defconfig
 make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu-
 make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- modules_install
 cp arch/x86/boot/bzImage /boot/kernel
 
-# GRUB
+# Enable SSH
+systemctl enable sshd.service
+sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
+systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=exherbo --root-password=packer --setup-machine-id
+ssh-keygen -A
 grub-install $ROOTDEV
-cat<<EOF > /boot/grub/grub.cfg
+
+cave resolve world -c
+cave resolve sys-apps/systemd
+EOF
+# End Chroot
+
+# GRUB
+cat<<EOF > /mnt/exherbo/boot/grub/grub.cfg
  set timeout=10
  set default=0
  menuentry "Exherbo" {
