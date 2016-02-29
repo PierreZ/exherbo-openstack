@@ -62,7 +62,7 @@ EOF
 chroot /mnt/exherbo /bin/bash -ex<<EOF
 source /etc/profile
 # Paludis
-cd /etc/paludis && vim bashrc && vim *conf
+kak /etc/paludis/{bashrc,{*}conf}
 cave sync
 
 # Let's compile our kernel!
@@ -76,7 +76,7 @@ cp arch/x86/boot/bzImage /boot/kernel
 # Enable SSH
 systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
-systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=exherbo --root-password=packer --setup-machine-id
+systemd-firstboot --locale=en_US.UTF-8 --locale-messages=en_US --timezone=Etc/UTC --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
 grub-install $ROOTDEV
 
