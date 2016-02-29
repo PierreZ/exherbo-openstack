@@ -8,11 +8,14 @@ set -e;
 
 # http://exherbo.org/docs/install-guide.html
 
+# exec > /tmp/exherbo 2>&1
+
 # Stage URl
 STAGE_URL="http://dev.exherbo.org/stages/exherbo-amd64-current.tar.xz"
 SHA1_URL="http://dev.exherbo.org/stages/sha1sum"
 
 #Root filesystem device
+# ROOTDEV=/dev/sda
 ROOTDEV=/dev/vda
 
 ROOTDEVICE="1"
@@ -41,6 +44,8 @@ curl -O http://dev.exherbo.org/stages/sha1sum
 grep exherbo-amd64-current.tar.xz sha1sum | sha1sum -c
 tar xJpf exherbo*xz
 
+echo "exherbo pulled";
+
 # fstab
 cat <<EOF > /mnt/exherbo/etc/fstab
 # <fs>       <mountpoint>    <type>    <opts>      <dump/pass>
@@ -58,7 +63,8 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
-# Start Chroot
+echo "Start Chroot";
+
 chroot /mnt/exherbo /bin/bash -ex<<EOF
 source /etc/profile
 # Paludis
@@ -83,7 +89,8 @@ grub-install $ROOTDEV
 cave resolve world -c
 cave resolve sys-apps/systemd
 EOF
-# End Chroot
+
+echo "End Chroot";
 
 # GRUB
 cat<<EOF > /mnt/exherbo/boot/grub/grub.cfg
