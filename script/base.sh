@@ -39,8 +39,8 @@ mkfs.ext4 $ROOTDEVDEVICE
 mkdir /mnt/exherbo && mount /dev/sda1 /mnt/exherbo && cd /mnt/exherbo;
 
 # Download stage exherbo and untar it
-curl -O http://dev.exherbo.org/stages/exherbo-amd64-current.tar.xz
-curl -O http://dev.exherbo.org/stages/sha1sum
+curl --max-time 3600  -O http://dev.exherbo.org/stages/exherbo-amd64-current.tar.xz
+curl --max-time 3600  -O http://dev.exherbo.org/stages/sha1sum
 grep exherbo-amd64-current.tar.xz sha1sum | sha1sum -c
 tar xJpf exherbo*xz
 
