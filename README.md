@@ -3,6 +3,8 @@ Exherbo image generator for Openstack
 
 ## How to run it?
 
-docker run -ti --privileged pierrezemb/exherbo-openstack /bin/bash
+sudo ./yolo.sh --arch=amd64 --kernelversion=4.4.4 --stageversion=current
 
-docker run -ti --privileged pierrezemb/exherbo-openstack
+## List of packages
+
+sudo apt install -y wget openssh-server vim qemu qemu-kvm unzip virtinst git 

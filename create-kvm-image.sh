@@ -1,0 +1,279 @@
+#!/bin/bash
+
+# Copyright (c) 2009 Bryan Østergaard
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# print usage instructions
+usage() {
+    cat <<EOF
+Usage: create-kvm-image [OPTIONS]
+Options:
+    -a|--arch=amd64|x86                Target architecture for image file
+    -k|--kernelversion=version         Kernel version to be used in image
+    -t|--stageversion=version          Date of tarball, for example 20090504 or current
+    --kvmtmpdir=/path/to/image         Where to build the image file. Defaults to /var/tmp/kvm-tmp
+    --kvmtmpkernel=/path/to/kernel     Where to build the kernel. Defaults to \${kvmtmpdir}/rootfs
+    --kvmimgname=/path/to/image      Image filename (including path). Defaults to \${kvmtmpdir}/exherbo-\${arch}.img
+    -s|--kvmimagesize=number           Size of image file in gigabytes. Defaults to 6
+    -j|--jobs=number                   Number of make jobs when building the kernel. Defaults to 4
+
+Example use:
+create-kvm-image --arch=amd64 --kernelversion=2.6.29.2 --stageversion=20090504
+
+Same but using short options:
+create-kvm-image -a=amd64 -k=2.6.29.2 -t=20090504
+EOF
+}
+
+# print message and exit
+die() {
+    echo $1
+    exit 1
+}
+
+# check that all commands required are installed
+checkprerequisites() {
+    for prereq in "${BIN_KPARTX}" "${BIN_KVMIMG}" "${BIN_PARTED}" ; do
+        [[ ! -x "${prereq}" ]] && die "${prereq} is missing. Exiting."
+    done
+}
+
+# makeimagefile /path/to/file size
+makeimagefile() {
+    "${BIN_KVMIMG}" create -f raw "$1" $2 || die "Failed to create KVM image."
+}
+
+# makepartitiontable /path/to/imagefile
+makepartitiontable() {
+    "${BIN_PARTED}" "$1" mklabel msdos || die "Failed to create partition table."
+}
+
+# makepartition /path/to/imagefile parttype fstype begin end
+# begin and end defaults to MB
+# example: makepartition /tmp/exherbo.img primary ext2 0 512
+makepartition() {
+    "${BIN_PARTED}" --align cylinder "$1" mkpart $2 $3 $4 $5 || die "Failed to create partition."
+}
+
+# makefilesystem /dev/mapper/loopNn fstype
+makefilesystem() {
+    echo "Creating $2 filesystem on $1"
+    case $2 in
+        ext2)
+            mkfs -t ext2 -q "$1" || die "Failed to create $2 filesystem."
+            ;;
+        ext3)
+            mkfs -t ext3 -q "$1" || die "Failed to create $2 filesystem."
+            ;;
+        swap)
+            mkswap "$1" 2> /dev/null || die "Failed to create $2 filesystem."
+            ;;
+        btrfs)
+            mkfs -t btrfs "$1" || die "Failed to create $2 filesystem."
+            ;;
+    esac
+}
+
+# mountfilesystem /dev/mapper/loopNn /path/to/rootfs
+mountfilesystem() {
+echo "penis"
+echo $1
+echo $2
+    [[ ! -d "$2" ]] && mkdir -p "$2"
+    mount "$1" "$2" || die "Couldn't mount filesystem $1 on $2."
+}
+
+getoptions() {
+    for option in "$@"; do
+        case "$option" in
+            -h|--help)
+                usage
+                exit 1
+                ;;
+            --kvmtmpdir=*)
+                KVMTMPDIR=${option#--kvmtmpdir=}
+                ;;
+            --kvmtmpkernel=*)
+                KVMTMPKERNEL=${option#--kvmtmpkernel=}
+                ;;
+            --kvmimgname=*)
+                KVMIMGNAME=${option#--kvmimgname=}
+                ;;
+            --kvmimagesize=*)
+                KVMIMGSIZE=${option#--kvmimagesize=}G
+                ;;
+            -s=*)
+                KVMIMGSIZE=${option#-s=}G
+                ;;
+            --kernelversion=*)
+                KERNELVER=${option#--kernelversion=}
+                ;;
+            -k=*)
+                KERNELVER=${option#-k=}
+                ;;
+            --stageversion=*)
+                STAGEVER=${option#--stageversion=}
+                ;;
+            -t=*)
+                STAGEVER=${option#-t=}
+                ;;
+            --arch=*)
+                ARCH=${option#--arch=}
+                [[ ${ARCH} != amd64 && ${ARCH} != x86 ]] && die "Wrong architecture specified"
+                ;;
+            -a=*)
+                ARCH=${option#-a=}
+                [[ ${ARCH} != amd64 && ${ARCH} != x86 ]] && die "Wrong architecture specified"
+                ;;
+            --jobs=*)
+                JOBS=${option#--jobs=}
+                ;;
+            -j=*)
+                JOBS=${option#-j=}
+                ;;
+            *)
+                usage
+                die "Unknown option passed, ${option}. Exiting."
+                ;;
+        esac
+    done
+}
+
+if [[ -z "$@" ]]; then
+    usage
+    exit 1
+fi
+
+getoptions "$@"
+
+# Full paths to non-basesystem binaries we depend on
+BIN_KPARTX=/sbin/kpartx
+BIN_KVMIMG=/usr/bin/qemu-img
+BIN_PARTED=/usr/sbin/parted
+
+checkprerequisites
+
+[[ -z ${KERNELVER} ]] && die "No kernel version specified."
+[[ -z ${STAGEVER} ]] && die "No stage tarball version version specified."
+[[ -z ${ARCH} ]] && die "No architecture specified."
+
+# Setup a few basic variables
+KVMTMPDIR="${KVMTMPDIR:-/var/tmp/kvm-tmp}"
+KVMTMPKERNEL="${KVMTMPKERNEL:-${KVMTMPDIR}/kernel}"
+KVMIMGNAME="${KVMIMGNAME:-${KVMTMPDIR}/exherbo-${ARCH}.img}"
+KVMIMGSIZE=${KVMIMGSIZE:-6G}
+KVMROOTFS="${KVMTMPDIR}"/rootfs
+JOBS=${JOBS:-4}
+
+[[ ! -d "${KVMTMPDIR}" ]] && mkdir -p "${KVMTMPDIR}"
+makeimagefile "${KVMIMGNAME}" ${KVMIMGSIZE}
+
+# Create partitions
+KVMIMGSECTORS=$(($(stat --format %s "${KVMIMGNAME}") / 512))
+
+# Setup partitions
+makepartitiontable "${KVMIMGNAME}"
+makepartition "${KVMIMGNAME}" primary ext2 2 512
+makepartition "${KVMIMGNAME}" primary linux-swap 512 1024
+makepartition "${KVMIMGNAME}" primary ext4 1024MB $((${KVMIMGSECTORS}-1))s
+
+# Create a loopback for the image, set up a device mapping for each partition therein
+PARTITIONS=$("${BIN_KPARTX}" -av "${KVMIMGNAME}" || die "Failed to create device mappings.")
+DEVMAP_BOOT=/dev/mapper/$(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3)
+DEVMAP_SWAP=/dev/mapper/$(echo "${PARTITIONS}" | sed "2!d" | cut -d' ' -f3)
+DEVMAP_ROOT=/dev/mapper/$(echo "${PARTITIONS}" | sed "3!d" | cut -d' ' -f3)
+
+# Make filesystems
+makefilesystem "${DEVMAP_BOOT}" ext2
+makefilesystem "${DEVMAP_SWAP}" swap
+makefilesystem "${DEVMAP_ROOT}" ext4
+
+# Download stage tarball + kernel sources
+[[ ! -f "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://dev.exherbo.org/stages/exherbo-${ARCH}-${STAGEVER}.tar.xz
+case ${KERNELVER} in
+    2.6*)
+        [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.bz2 ]] && wget --directory-prefix="${KVMTMPDIR}" http://kernel.org/pub/linux/kernel/v2.6/linux-${KERNELVER}.tar.bz2
+        ;;
+    3.0*)
+        [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.bz2 ]] && wget --directory-prefix="${KVMTMPDIR}" http://kernel.org/pub/linux/kernel/v3.0/linux-${KERNELVER}.tar.bz2
+        ;;
+    4.4*)
+        [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://kernel.org/pub/linux/kernel/v4.x/linux-${KERNELVER}.tar.xz
+        ;;
+esac
+
+# Mount / filesystem and populate using the stage tarball
+mountfilesystem "${DEVMAP_ROOT}" "${KVMROOTFS}"
+xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
+
+# Mount /boot
+mountfilesystem "${DEVMAP_BOOT}" "${KVMROOTFS}"/boot
+
+# Build a kernel
+[[ ! -d "${KVMTMPKERNEL}" ]] && mkdir -p "${KVMTMPKERNEL}"
+echo "Unpacking stage tarball to / filesystem"
+xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
+cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
+make x86_64_defconfig
+
+# Add support for Realtek 8139 driver used by kvm
+sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
+sed -i -e 's/.*CONFIG_VIRTIO_PCI.*/CONFIG_VIRTIO_PCI=y/' .config
+echo 'CONFIG_VIRTIO_NET=y' >> .config
+echo 'CONFIG_VIRTIO_BLK=y' >> .config
+echo 'CONFIG_VIRTIO_CONSOLE=y' >> .config
+echo 'CONFIG_HW_RANDOM_VIRTIO=y' >> .config
+
+# Enable /proc/config.gz support
+sed -i -e 's/.*CONFIG_IKCONFIG[= ].*/CONFIG_IKCONFIG=y/' .config
+echo 'CONFIG_IKCONFIG_PROC=y' >> .config
+
+make -j${JOBS} bzImage || die "Building bzImage failed."
+make -j${JOBS} modules || die "Building modules failed."
+INSTALL_PATH="${KVMROOTFS}"/boot make install || die "Installing kernel failed."
+INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules failed."
+
+# Reset roots password
+chroot "${KVMROOTFS}" /usr/bin/passwd -d root
+
+# Update fstab
+ cat <<EOF > "${KVMROOTFS}/etc/fstab"
+# <fs>       <mountpoint>    <type>    <opts>      <dump/pass>
+/dev/sda1    /boo            ext4      defaults    0 0
+/dev/sda2    swap            swap      defaults    0 0
+/dev/sda3    /               ext4      defaults    0 2
+EOF
+
+# Create grub configuration
+#makegrubconfig "${KVMROOTFS}"/boot/grub legacy ${KERNELVER}
+#installgrub "${KVMROOTFS}" legacy "${KVMIMGNAME}"
+
+echo "Start Chroot";
+
+chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
+# Enable SSH
+systemctl enable sshd.service
+sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
+ssh-keygen -A
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+EOF
+echo "End Chroot";
+# Unmount /boot and /
+umount "${KVMROOTFS}"/boot
+umount "${KVMROOTFS}"
+
+# Remove device mappings and loopback device
+sleep 5
+"${BIN_KPARTX}" -dv "${KVMIMGNAME}" || die "Failed to remove device mappings."
