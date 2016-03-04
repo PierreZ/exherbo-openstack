@@ -242,6 +242,7 @@ chroot "${KVMROOTFS}" /usr/bin/passwd -d root
 echo "Start Chroot";
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
+genfstab -U /mnt >> /mnt/etc/fstab
 # Enable SSH
 systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
