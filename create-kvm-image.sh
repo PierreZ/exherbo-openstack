@@ -157,7 +157,7 @@ getoptions "$@"
 # Full paths to non-basesystem binaries we depend on
 BIN_KPARTX=/sbin/kpartx
 BIN_KVMIMG=/usr/bin/qemu-img
-BIN_PARTED=/usr/sbin/parted
+BIN_PARTED=/sbin/parted
 
 checkprerequisites
 
@@ -235,14 +235,6 @@ INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules 
 # Reset roots password
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
 
-# Update fstab
- cat <<EOF > "${KVMROOTFS}/etc/fstab"
-# <fs>       <mountpoint>    <type>    <opts>      <dump/pass>
-/dev/sda1    /boo            ext4      defaults    0 0
-/dev/sda2    swap            swap      defaults    0 0
-/dev/sda3    /               ext4      defaults    0 2
-EOF
-
 # Create grub configuration
 #makegrubconfig "${KVMROOTFS}"/boot/grub legacy ${KERNELVER}
 #installgrub "${KVMROOTFS}" legacy "${KVMIMGNAME}"
@@ -258,8 +250,13 @@ grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 EOF
 echo "End Chroot";
+
+# Fstab
+cat <<EOF > "${KVMROOTFS}" /etc/fstab
+/dev/sda1               /                 btrfs         rw,relatime,ssd,space_cache    0 0
+EOF
+
 # Unmount /boot and /
-umount "${KVMROOTFS}"/boot
 umount "${KVMROOTFS}"
 
 # Remove device mappings and loopback device
