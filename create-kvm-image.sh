@@ -181,20 +181,14 @@ KVMIMGSECTORS=$(($(stat --format %s "${KVMIMGNAME}") / 512))
 
 # Setup partitions
 makepartitiontable "${KVMIMGNAME}"
-makepartition "${KVMIMGNAME}" primary ext2 2 512
-makepartition "${KVMIMGNAME}" primary linux-swap 512 1024
-makepartition "${KVMIMGNAME}" primary ext4 1024MB $((${KVMIMGSECTORS}-1))s
+makepartition "${KVMIMGNAME}" primary btrfs 2 $((${KVMIMGSECTORS}-1))s
 
 # Create a loopback for the image, set up a device mapping for each partition therein
 PARTITIONS=$("${BIN_KPARTX}" -av "${KVMIMGNAME}" || die "Failed to create device mappings.")
-DEVMAP_BOOT=/dev/mapper/$(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3)
-DEVMAP_SWAP=/dev/mapper/$(echo "${PARTITIONS}" | sed "2!d" | cut -d' ' -f3)
-DEVMAP_ROOT=/dev/mapper/$(echo "${PARTITIONS}" | sed "3!d" | cut -d' ' -f3)
+DEVMAP_ROOT=/dev/mapper/$(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3)
 
 # Make filesystems
-makefilesystem "${DEVMAP_BOOT}" ext2
-makefilesystem "${DEVMAP_SWAP}" swap
-makefilesystem "${DEVMAP_ROOT}" ext4
+makefilesystem "${DEVMAP_ROOT}" btrfs
 
 # Download stage tarball + kernel sources
 [[ ! -f "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://dev.exherbo.org/stages/exherbo-${ARCH}-${STAGEVER}.tar.xz
@@ -213,9 +207,6 @@ esac
 # Mount / filesystem and populate using the stage tarball
 mountfilesystem "${DEVMAP_ROOT}" "${KVMROOTFS}"
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
-
-# Mount /boot
-mountfilesystem "${DEVMAP_BOOT}" "${KVMROOTFS}"/boot
 
 # Build a kernel
 [[ ! -d "${KVMTMPKERNEL}" ]] && mkdir -p "${KVMTMPKERNEL}"
