@@ -8,3 +8,11 @@ sudo ./create-kvm-image.sh --arch=amd64 --kernelversion=4.4.4 --stageversion=cur
 ## List of packages
 
 fakeroot build-essential devscripts qemu qemu-kvm unzip virtinst git btrfs-tools kpartx bc
+
+# Glance installation
+
+sudo apt-get install python-dev python-pip
+sudo pip install python-glanceclient
+
+# Glance upload
+glance image-create --name "exherbo-image" --disk-format qcow2 --container-format bare < /var/tmp/kvm-tmp/exherbo-amd64.img
