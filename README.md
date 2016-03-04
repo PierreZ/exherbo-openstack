@@ -7,4 +7,4 @@ sudo ./create-kvm-image.sh --arch=amd64 --kernelversion=4.4.4 --stageversion=cur
 
 ## List of packages
 
-fakeroot build-essential devscripts qemu qemu-kvm unzip virtinst git 
+fakeroot build-essential devscripts qemu qemu-kvm unzip virtinst git btrfs
