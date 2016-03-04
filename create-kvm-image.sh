@@ -235,14 +235,6 @@ INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules 
 # Reset roots password
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
 
-# Update fstab
- cat <<EOF > "${KVMROOTFS}/etc/fstab"
-# <fs>       <mountpoint>    <type>    <opts>      <dump/pass>
-/dev/sda1    /boo            ext4      defaults    0 0
-/dev/sda2    swap            swap      defaults    0 0
-/dev/sda3    /               ext4      defaults    0 2
-EOF
-
 # Create grub configuration
 #makegrubconfig "${KVMROOTFS}"/boot/grub legacy ${KERNELVER}
 #installgrub "${KVMROOTFS}" legacy "${KVMIMGNAME}"
@@ -250,6 +242,7 @@ EOF
 echo "Start Chroot";
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
+genfstab -U /mnt >> /mnt/etc/fstab
 # Enable SSH
 systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
