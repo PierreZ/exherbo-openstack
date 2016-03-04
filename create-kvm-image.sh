@@ -157,7 +157,7 @@ getoptions "$@"
 # Full paths to non-basesystem binaries we depend on
 BIN_KPARTX=/sbin/kpartx
 BIN_KVMIMG=/usr/bin/qemu-img
-BIN_PARTED=/usr/sbin/parted
+BIN_PARTED=/sbin/parted
 
 checkprerequisites
 
