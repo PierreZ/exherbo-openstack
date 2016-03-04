@@ -87,9 +87,6 @@ makefilesystem() {
 
 # mountfilesystem /dev/mapper/loopNn /path/to/rootfs
 mountfilesystem() {
-echo "penis"
-echo $1
-echo $2
     [[ ! -d "$2" ]] && mkdir -p "$2"
     mount "$1" "$2" || die "Couldn't mount filesystem $1 on $2."
 }
