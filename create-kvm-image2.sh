@@ -201,11 +201,11 @@ esac
 # Mount / filesystem and populate using the stage tarball
 mountfilesystem "${DEVMAP_ROOT}" "${KVMROOTFS}"
 mkdir -p ${KVMROOTFS}/dev
-mount -o rbind /dev ${KVMROOTFS}/dev/
+mount -o bind /dev ${KVMROOTFS}/dev
 mkdir -p ${KVMROOTFS}/sys
-mount -o bind /sys ${KVMROOTFS}/sys/
+mount -o bind /sys ${KVMROOTFS}/sys
 mkdir -p ${KVMROOTFS}/proc
-mount -t proc none ${KVMROOTFS}/proc/
+mount -t proc none ${KVMROOTFS}/proc
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
 
 # Build a kernel
@@ -249,11 +249,11 @@ sync
 # Enable SSH
 systemctl enable sshd.service
 echo "(hd0) ${DEVMAP_ROOT}" >> /root/device.map
+grub-install --grub-mkdevicemap="/root/device.map" --boot-directory=/boot /dev/mapper/$(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3 | cut -c 1-5) || exit 1
+grub-mkconfig -o /boot/grub/grub.cfg || exit 1
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=build --root-password=packer --setup-machine-id
 ssh-keygen -A
-grub-install --grub-mkdevicemap="/root/device.map" --boot-directory=/boot $(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3 | cut -c 1-5) || exit 1
-grub-mkconfig -o /boot/grub/grub.cfg || exit 1
 EOF
 echo "End Chroot";
 
@@ -283,6 +283,8 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 cat <<EOF > "${KVMROOTFS}"/etc/fstab
 /dev/sda1               /                 btrfs         rw,relatime,ssd,space_cache    0 0
 EOF
+
+sync
 
 # Unmount /boot and /
 umount "${KVMROOTFS}"
