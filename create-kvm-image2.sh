@@ -248,7 +248,8 @@ sync
 
 # Enable SSH
 systemctl enable sshd.service
-echo "(hd0) ${DEVMAP_ROOT}" >> /root/device.map
+# echo "(hd0) ${DEVMAP_ROOT}" >> /root/device.map
+echo "(hd0) /dev/mapper/loop0" >> /root/device.map
 grub-install --grub-mkdevicemap="/root/device.map" --boot-directory=/boot /dev/mapper/$(echo "${PARTITIONS}" | sed "1!d" | cut -d' ' -f3 | cut -c 1-5) || exit 1
 grub-mkconfig -o /boot/grub/grub.cfg || exit 1
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
