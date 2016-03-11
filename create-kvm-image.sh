@@ -260,15 +260,6 @@ ssh-keygen -A
 EOF
 echo "End Chroot";
 
-cat > "${KVMROOTFS}/boot/grub/menu.lst" <<EOF
-timeout 3
-default 0
-
-title Exherbo
-root (hd0,msdos1)
-kernel /vmlinuz-${KERNELVER} root=/dev/sda1
-EOF
-
 cat <<EOF > "${KVMROOTFS}"/etc/systemd/network/dhcp.network
 [Match]
 Name=e*
