@@ -273,6 +273,9 @@ EOF
 sync
 
 # Unmount /boot and /
+umount "${KVMROOTFS}/dev"
+umount "${KVMROOTFS}/sys"
+umount "${KVMROOTFS}/proc"
 umount "${KVMROOTFS}"
 
 # Remove device mappings and loopback device
