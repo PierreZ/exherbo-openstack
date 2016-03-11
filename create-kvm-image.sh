@@ -184,7 +184,7 @@ KVMIMGSECTORS=$(($(stat --format %s "${KVMIMGNAME}") / 512))
 
 # Setup partitions
 makepartitiontable "${KVMIMGNAME}"
-makepartition "${KVMIMGNAME}" primary btrfs 0 $((${KVMIMGSECTORS}-1))s
+makepartition "${KVMIMGNAME}" primary btrfs 2 $((${KVMIMGSECTORS}-1))s
 
 # Create a loopback for the image, set up a device mapping for each partition therein
 PARTITIONS=$("${BIN_KPARTX}" -av "${KVMIMGNAME}" || die "Failed to create device mappings.")
