@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2009 Bryan Østergaard
+# Copyright (c) 2016 Pierre Zemb
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2, as
@@ -12,6 +12,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Heavily inspired from:
+# http://git.exherbo.org/exherbo.git/tree/scripts/create-kvm-image
 
 # print usage instructions
 usage() {
