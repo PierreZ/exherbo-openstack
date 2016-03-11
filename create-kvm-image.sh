@@ -254,7 +254,7 @@ sync
 systemctl enable sshd.service
 
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
-systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=build --root-password=packer --setup-machine-id
+systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Europe/Paris --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
 EOF
 echo "End Chroot";
@@ -278,7 +278,7 @@ set timeout=10
 set default=0
 menuentry "Exherbo" {
     set root=(hd0,msdos1)
-    linkx /vmlinuz-${KERNELVER} root=/dev/sda1
+    linux /vmlinuz-${KERNELVER} root=/dev/sda1
 }
 EOF
 
