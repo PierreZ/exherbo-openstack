@@ -12,6 +12,7 @@ fakeroot build-essential devscripts qemu qemu-kvm unzip virtinst git btrfs-tools
 # Glance installation
 
 sudo apt-get install python-dev python-pip
+
 sudo pip install python-glanceclient
 
 # Glance upload
