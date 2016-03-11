@@ -277,7 +277,7 @@ cat<<EOF > ${KVMROOTFS}/boot/grub/grub.cfg
 set timeout=10
 set default=0
 menuentry "Exherbo" {
-    set root=(hd0,1)
+    set root=(hd0,msdos1)
     linkx /vmlinuz-${KERNELVER} root=/dev/sda1
 }
 EOF
