@@ -239,6 +239,7 @@ INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules 
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
 
 # Create grub configuration
+echo "Grub configuration..."
 echo "(hd0) /dev/loop0" >> ${KVMROOTFS}/root/device.map
 grub-install --no-floppy --grub-mkdevicemap=${KVMROOTFS}/root/device.map --root-directory=${KVMROOTFS} /dev/loop0 || exit 1
 
