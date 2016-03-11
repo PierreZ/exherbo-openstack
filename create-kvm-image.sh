@@ -274,6 +274,15 @@ cat <<EOF > "${KVMROOTFS}"/etc/fstab
 /dev/sda1               /                 btrfs         rw,relatime,ssd,space_cache    0 0
 EOF
 
+cat<<EOF > ${KVMROOTFS}/boot/grub/grub.cfg
+set timeout=10
+set default=0
+menuentry "Exherbo" {
+    set root=(hd0,1)
+    linkx /vmlinuz-${KERNELVER} root=/dev/sda1
+}
+EOF
+
 sync
 
 # Unmount /boot and /
