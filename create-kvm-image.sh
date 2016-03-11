@@ -253,7 +253,7 @@ sync
 # Enable SSH
 systemctl enable sshd.service
 
-# grub-mkconfig -o /boot/grub/grub.cfg || exit 1
+grub-mkconfig -o /boot/grub/grub.cfg || exit 1
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Etc/UTC --hostname=build --root-password=packer --setup-machine-id
 ssh-keygen -A
