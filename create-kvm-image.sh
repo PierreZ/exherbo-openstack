@@ -16,6 +16,10 @@
 # Heavily inspired from:
 # http://git.exherbo.org/exherbo.git/tree/scripts/create-kvm-image
 
+
+logfile=/var/log/exherbo.log
+exec > $logfile 2>&1
+
 # print usage instructions
 usage() {
     cat <<EOF
