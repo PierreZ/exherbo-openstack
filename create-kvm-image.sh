@@ -219,7 +219,9 @@ xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROO
 echo "Unpacking stage tarball to / filesystem"
 xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
 cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
-make x86_64_defconfig
+#make x86_64_defconfig
+make mrproper
+make kvmconfig
 
 # Add support for Realtek 8139 driver used by kvm
 sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
@@ -266,9 +268,6 @@ ssh-keygen -A
 
 echo "installing dracut"
 cave sync
-# cave resolve world -c
-cave resolve -x1 sys-boot/dracut
-dracut --hostonly
 EOF
 echo "End Chroot";
 
