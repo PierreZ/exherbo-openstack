@@ -266,7 +266,7 @@ ssh-keygen -A
 
 echo "installing dracut"
 cave sync
-cave resolve world -c
+# cave resolve world -c
 cave resolve -x1 sys-boot/dracut
 dracut --hostonly
 EOF
