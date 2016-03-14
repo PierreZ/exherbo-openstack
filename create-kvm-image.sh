@@ -253,8 +253,8 @@ echo "Start Chroot";
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 set -e;
 source /etc/profile
-echo "en_US.UTF-8" > /etc/locale.gen
-locale-gen
+echo LANG="en_US.UTF-8" > /etc/env.d/99locale
+localedef -i en_US -f UTF-8 en_US.UTF-8
 sync
 
 # Enable SSH
