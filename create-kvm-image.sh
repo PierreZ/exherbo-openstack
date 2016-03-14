@@ -211,6 +211,9 @@ mkdir -p ${KVMROOTFS}/proc
 mount -t proc none ${KVMROOTFS}/proc
 mkdir -p ${KVMROOTFS}/dev/pts
 mount --bind /dev/pts ${KVMROOTFS}/dev/pts
+
+cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
+
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
 
 # Build a kernel
@@ -250,7 +253,8 @@ echo "Start Chroot";
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 set -e;
 source /etc/profile
-localedef -i en_US -f UTF-8 en_US.UTF-8
+echo "en_US.UTF-8" > /etc/locale.gen
+locale-gen
 sync
 
 # Enable SSH
@@ -262,6 +266,7 @@ ssh-keygen -A
 
 echo "installing dracut"
 cave sync
+cave resolve world -c
 cave resolve -x1 sys-boot/dracut
 dracut --hostonly
 EOF
