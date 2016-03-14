@@ -212,8 +212,6 @@ mount -t proc none ${KVMROOTFS}/proc
 mkdir -p ${KVMROOTFS}/dev/pts
 mount --bind /dev/pts ${KVMROOTFS}/dev/pts
 
-cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
-
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
 
 # Build a kernel
@@ -242,6 +240,8 @@ INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules 
 
 # Reset roots password
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
+
+cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
 
 # Create grub configuration
 echo "Grub configuration..."
