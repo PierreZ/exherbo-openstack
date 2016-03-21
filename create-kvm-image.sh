@@ -196,7 +196,7 @@ makefilesystem "${DEVMAP_ROOT}" btrfs
 # Download stage tarball + kernel sources
 [[ ! -f "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://dev.exherbo.org/stages/exherbo-${ARCH}-${STAGEVER}.tar.xz
 case ${KERNELVER} in
-    4.4*)
+    4.*)
         [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${KERNELVER}.tar.xz
         ;;
 esac
