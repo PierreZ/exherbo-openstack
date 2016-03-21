@@ -221,8 +221,7 @@ xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
 cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
 
 mkdir -p /lib/modules/${KERNELVER}/build
-ln -s "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/build
-exit 0
+cp -r "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/build
 make x86_64_defconfig
 
 # Add support for Realtek 8139 driver used by kvm
