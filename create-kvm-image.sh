@@ -220,9 +220,9 @@ echo "Unpacking stage tarball to / filesystem"
 xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
 cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
 
+mkdir -p /lib/modules/${KERNELVER}/build
 ln -s "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/build
-ln -s "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/source
-
+exit 0
 make x86_64_defconfig
 
 # Add support for Realtek 8139 driver used by kvm
