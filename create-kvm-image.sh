@@ -270,9 +270,6 @@ systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Europe/Paris --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
-
-echo "installing dracut"
-cave sync
 EOF
 echo "End Chroot";
 
@@ -307,9 +304,6 @@ umount "${KVMROOTFS}/dev"
 umount "${KVMROOTFS}/sys"
 umount "${KVMROOTFS}/proc"
 umount "${KVMROOTFS}"
-
-unlink /lib/modules/${KERNELVER}/build
-unlink /lib/modules/${KERNELVER}/source
 
 # Remove device mappings and loopback device
 sleep 5
