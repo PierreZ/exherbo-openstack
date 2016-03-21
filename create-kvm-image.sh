@@ -197,7 +197,7 @@ makefilesystem "${DEVMAP_ROOT}" btrfs
 [[ ! -f "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://dev.exherbo.org/stages/exherbo-${ARCH}-${STAGEVER}.tar.xz
 case ${KERNELVER} in
     4.4*)
-        [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" http://kernel.org/pub/linux/kernel/v4.x/linux-${KERNELVER}.tar.xz
+        [[ ! -f "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz ]] && wget --directory-prefix="${KVMTMPDIR}" https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${KERNELVER}.tar.xz
         ;;
 esac
 
@@ -219,9 +219,11 @@ xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROO
 echo "Unpacking stage tarball to / filesystem"
 xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
 cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
-#make x86_64_defconfig
-make mrproper
-make kvmconfig
+
+ln -s "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/build
+ln -s "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/source
+
+make x86_64_defconfig
 
 # Add support for Realtek 8139 driver used by kvm
 sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
@@ -236,9 +238,13 @@ sed -i -e 's/.*CONFIG_IKCONFIG[= ].*/CONFIG_IKCONFIG=y/' .config
 echo 'CONFIG_IKCONFIG_PROC=y' >> .config
 
 make -j${JOBS} bzImage || die "Building bzImage failed."
+echo "make bzImage done"
 make -j${JOBS} modules || die "Building modules failed."
+echo "make modules done"
 INSTALL_PATH="${KVMROOTFS}"/boot make install || die "Installing kernel failed."
+echo "make install done"
 INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules failed."
+echo "make modules_install done"
 
 # Reset roots password
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
@@ -302,6 +308,9 @@ umount "${KVMROOTFS}/dev"
 umount "${KVMROOTFS}/sys"
 umount "${KVMROOTFS}/proc"
 umount "${KVMROOTFS}"
+
+unlink /lib/modules/${KERNELVER}/build
+unlink /lib/modules/${KERNELVER}/source
 
 # Remove device mappings and loopback device
 sleep 5
