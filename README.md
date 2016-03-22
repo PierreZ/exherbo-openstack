@@ -16,4 +16,4 @@ sudo apt-get install python-dev python-pip
 sudo pip install python-glanceclient
 
 # Glance upload
-glance image-create --name "exherbo-image" --disk-format qcow2 --container-format bare < /var/tmp/kvm-tmp/exherbo-amd64.img
+glance image-create --name "exherbo-image" --disk-format qcow2 --container-format bare < exherbo.img
