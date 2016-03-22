@@ -264,9 +264,9 @@ ssh-keygen -A
 
 echo "exherbo" > /etc/hostname
 echo -e "127.0.0.1    localhost exherbo \n::1          localhost exherbo" > /etc/hosts
-cave resolve world
-cave resolve sys-boot/dracut
+cave resolve -x sys-boot/dracut
 dracut
+ls /boot
 EOF
 echo "End Chroot";
 
