@@ -265,7 +265,8 @@ ssh-keygen -A
 echo "exherbo" > /etc/hostname
 echo -e "127.0.0.1    localhost exherbo \n::1          localhost exherbo" > /etc/hosts
 cave resolve -x sys-boot/dracut
-dracut
+cave resolve -x sys-fs/btrfs-progs
+dracut --hostonly '' ${KERNELVER}
 ls /boot
 EOF
 echo "End Chroot";
@@ -290,6 +291,7 @@ set default=0
 menuentry "Exherbo" {
     set root=(hd0,msdos1)
     linux /boot/vmlinuz-${KERNELVER} root=/dev/sda1
+    initrd /boot/initramfs-${KERNELVER}.img
 }
 EOF
 
