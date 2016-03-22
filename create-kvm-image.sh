@@ -261,6 +261,12 @@ systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Europe/Paris --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
+
+echo "exherbo" > /etc/hostname
+echo -e "127.0.0.1    localhost exherbo \n::1          localhost exherbo" > /etc/hosts
+cave resolve world
+cave resolve sys-boot/dracut
+dracut
 EOF
 echo "End Chroot";
 
