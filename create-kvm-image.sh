@@ -218,13 +218,15 @@ mv "${KVMTMPKERNEL}"/linux-${KERNELVER} ${KVMROOTFS}/usr/src/linux
 echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > ${KVMROOTFS}/etc/resolv.conf
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
+echo LANG="en_US.UTF-8" > /etc/env.d/99locale
+localedef -i en_US -f UTF-8 en_US.UTF-8
 cave sync
 
 cd /usr/src/linux
 
 make mrproper
-yes "" | make x86_64_defconfig
-yes "" | make kvmconfig
+yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- x86_64_defconfig
+yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- kvmconfig
 
 # Add support for Realtek 8139 driver used by kvm
 sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
@@ -241,13 +243,13 @@ echo 'CONFIG_IKCONFIG_PROC=y' >> .config
 make -j${JOBS} HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu-
 echo "make done" 
 
-make -j${JOBS} modules || die "Building modules failed." 
+make -j${JOBS} modules HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- || die "Building modules failed." 
 echo "make modules done" 
 
-make install || die "Installing kernel failed." 
+make install HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- || die "Installing kernel failed." 
 echo "make install done" 
 
-make modules_install || die "Installing modules failed." 
+make modules_install HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- || die "Installing modules failed." 
 echo "make modules_install done"
 EOF
 
@@ -260,12 +262,6 @@ echo "(hd0) /dev/loop0" >> ${KVMROOTFS}/root/device.map
 grub-install --no-floppy --grub-mkdevicemap=${KVMROOTFS}/root/device.map --root-directory=${KVMROOTFS} /dev/loop0 || exit 1
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
-set -e;
-source /etc/profile
-echo LANG="en_US.UTF-8" > /etc/env.d/99locale
-localedef -i en_US -f UTF-8 en_US.UTF-8
-sync
-
 # Enable SSH
 systemctl enable sshd.service
 
