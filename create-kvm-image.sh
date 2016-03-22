@@ -220,6 +220,7 @@ echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > ${KVMROOTFS}/etc/resolv.conf
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 echo LANG="en_US.UTF-8" > /etc/env.d/99locale
 localedef -i en_US -f UTF-8 en_US.UTF-8
+source /etc/profile
 cave sync
 
 cd /usr/src/linux
