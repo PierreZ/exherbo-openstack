@@ -229,14 +229,6 @@ make mrproper
 yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- x86_64_defconfig
 yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- kvmconfig
 
-# Add support for Realtek 8139 driver used by kvm
-sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
-sed -i -e 's/.*CONFIG_VIRTIO_PCI.*/CONFIG_VIRTIO_PCI=y/' .config
-echo 'CONFIG_VIRTIO_NET=y' >> .config
-echo 'CONFIG_VIRTIO_BLK=y' >> .config
-echo 'CONFIG_VIRTIO_CONSOLE=y' >> .config
-echo 'CONFIG_HW_RANDOM_VIRTIO=y' >> .config
-
 # Enable /proc/config.gz support
 sed -i -e 's/.*CONFIG_IKCONFIG[= ].*/CONFIG_IKCONFIG=y/' .config
 echo 'CONFIG_IKCONFIG_PROC=y' >> .config
