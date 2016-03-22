@@ -203,26 +203,27 @@ esac
 
 # Mount / filesystem and populate using the stage tarball
 mountfilesystem "${DEVMAP_ROOT}" "${KVMROOTFS}"
-mkdir -p ${KVMROOTFS}/dev
-mount -o bind /dev ${KVMROOTFS}/dev
-mkdir -p ${KVMROOTFS}/sys
-mount -o bind /sys ${KVMROOTFS}/sys
-mkdir -p ${KVMROOTFS}/proc
-mount -t proc none ${KVMROOTFS}/proc
-mkdir -p ${KVMROOTFS}/dev/pts
-mount --bind /dev/pts ${KVMROOTFS}/dev/pts
+mount -o rbind /dev ${KVMROOTFS}/dev/
+mount -o bind /sys ${KVMROOTFS}/sys/
+mount -t proc none ${KVMROOTFS}/proc/
 
+cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
+
+# Handling tar of Kernel
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
-
-# Build a kernel
 [[ ! -d "${KVMTMPKERNEL}" ]] && mkdir -p "${KVMTMPKERNEL}"
 echo "Unpacking stage tarball to / filesystem"
 xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
-cd "${KVMTMPKERNEL}"/linux-${KERNELVER}
+mv "${KVMTMPKERNEL}"/linux-${KERNELVER} ${KVMROOTFS}/usr/src/linux
 
-mkdir -p /lib/modules/${KERNELVER}/build
-cp -r "${KVMTMPKERNEL}"/linux-${KERNELVER} /lib/modules/${KERNELVER}/build
-make x86_64_defconfig
+chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
+cave sync
+
+cd /usr/src/linux
+
+make mrproper
+yes "" | make x86_64_defconfig
+yes "" | make kvmconfig
 
 # Add support for Realtek 8139 driver used by kvm
 sed -i -e 's/.*CONFIG_8139CP.*/CONFIG_8139CP=y/' .config
@@ -236,26 +237,26 @@ echo 'CONFIG_HW_RANDOM_VIRTIO=y' >> .config
 sed -i -e 's/.*CONFIG_IKCONFIG[= ].*/CONFIG_IKCONFIG=y/' .config
 echo 'CONFIG_IKCONFIG_PROC=y' >> .config
 
-make -j${JOBS} bzImage || die "Building bzImage failed."
-echo "make bzImage done"
-make -j${JOBS} modules || die "Building modules failed."
-echo "make modules done"
-INSTALL_PATH="${KVMROOTFS}"/boot make install || die "Installing kernel failed."
-echo "make install done"
-INSTALL_MOD_PATH="${KVMROOTFS}" make modules_install || die "Installing modules failed."
+make -j${JOBS} HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu-
+echo "make done" 
+
+make -j${JOBS} modules || die "Building modules failed." 
+echo "make modules done" 
+
+make install || die "Installing kernel failed." 
+echo "make install done" 
+
+make modules_install || die "Installing modules failed." 
 echo "make modules_install done"
+EOF
 
 # Reset roots password
 chroot "${KVMROOTFS}" /usr/bin/passwd -d root
-
-cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
 
 # Create grub configuration
 echo "Grub configuration..."
 echo "(hd0) /dev/loop0" >> ${KVMROOTFS}/root/device.map
 grub-install --no-floppy --grub-mkdevicemap=${KVMROOTFS}/root/device.map --root-directory=${KVMROOTFS} /dev/loop0 || exit 1
-
-echo "Start Chroot";
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 set -e;
@@ -270,6 +271,7 @@ systemctl enable sshd.service
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Europe/Paris --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
+cave resolve sys-fs/btrfs-progs
 EOF
 echo "End Chroot";
 
@@ -300,8 +302,8 @@ EOF
 sync
 
 # Unmount /boot and /
-umount "${KVMROOTFS/dev/pts"
-umount "${KVMROOTFS/dev"
+umount "${KVMROOTFS}/dev/pts"
+umount "${KVMROOTFS}/dev"
 umount "${KVMROOTFS}/sys"
 umount "${KVMROOTFS}/proc"
 umount "${KVMROOTFS}"
