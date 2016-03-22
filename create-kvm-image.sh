@@ -208,14 +208,14 @@ mount -o rbind /dev ${KVMROOTFS}/dev/
 mount -o bind /sys ${KVMROOTFS}/sys/
 mount -t proc none ${KVMROOTFS}/proc/
 
-cp /etc/resolv.conf ${KVMROOTFS}/etc/resolv.conf
-
 # Handling tar of Kernel
 xz -dc "${KVMTMPDIR}"/exherbo-${ARCH}-${STAGEVER}.tar.xz | tar xf - -C "${KVMROOTFS}"
 [[ ! -d "${KVMTMPKERNEL}" ]] && mkdir -p "${KVMTMPKERNEL}"
 echo "Unpacking stage tarball to / filesystem"
 xz -dc "${KVMTMPDIR}"/linux-${KERNELVER}.tar.xz | tar xf - -C "${KVMTMPKERNEL}"
 mv "${KVMTMPKERNEL}"/linux-${KERNELVER} ${KVMROOTFS}/usr/src/linux
+
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > ${KVMROOTFS}/etc/resolv.conf
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 cave sync
