@@ -284,17 +284,13 @@ set default=0
 menuentry "Exherbo" {
     set root=(hd0,msdos1)
     linux /boot/vmlinuz-${KERNELVER} root=/dev/sda1
-    initrd /boot/initrd.img-${KERNELVER}
 }
 EOF
 
 sync
 
-# Unmount /boot and /
-umount "${KVMROOTFS}/dev"
-umount "${KVMROOTFS}/sys"
-umount "${KVMROOTFS}/proc"
-umount "${KVMROOTFS}"
+# Unmount
+umount -lf "${KVMROOTFS}"
 
 # Remove device mappings and loopback device
 sleep 5
