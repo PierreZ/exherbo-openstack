@@ -225,7 +225,7 @@ cave sync
 
 cd /usr/src/linux
 
-make mrproper
+make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- mrproper
 yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- x86_64_defconfig
 yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- kvmconfig
 
