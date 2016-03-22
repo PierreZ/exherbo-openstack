@@ -203,6 +203,7 @@ esac
 
 # Mount / filesystem and populate using the stage tarball
 mountfilesystem "${DEVMAP_ROOT}" "${KVMROOTFS}"
+mkdir -p ${KVMROOTFS}/dev ${KVMROOTFS}/sys ${KVMROOTFS}/proc
 mount -o rbind /dev ${KVMROOTFS}/dev/
 mount -o bind /sys ${KVMROOTFS}/sys/
 mount -t proc none ${KVMROOTFS}/proc/
