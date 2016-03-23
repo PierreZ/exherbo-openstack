@@ -282,7 +282,7 @@ EOF
 
 # Fstab
 cat <<EOF > "${KVMROOTFS}"/etc/fstab
-/dev/sda1               /                 btrfs         rw,relatime,ssd,space_cache    0 0
+/dev/vda1               /                 btrfs         rw,relatime,ssd,space_cache    0 0
 EOF
 
 cat<<EOF > ${KVMROOTFS}/boot/grub/grub.cfg
