@@ -266,7 +266,7 @@ echo "exherbo" > /etc/hostname
 echo -e "127.0.0.1    localhost exherbo \n::1          localhost exherbo" > /etc/hosts
 cave resolve -x sys-boot/dracut
 cave resolve -x sys-fs/btrfs-progs
-dracut --hostonly '' ${KERNELVER}
+dracut --verbose '' ${KERNELVER}
 ls /boot
 EOF
 echo "End Chroot";
