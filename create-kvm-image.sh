@@ -290,7 +290,7 @@ set timeout=10
 set default=0
 menuentry "Exherbo" {
     set root=(hd0,msdos1)
-    linux /boot/vmlinuz-${KERNELVER} root=/dev/sda1
+    linux /boot/vmlinuz-${KERNELVER} root=/dev/vda1
     initrd /boot/initramfs-${KERNELVER}.img
 }
 EOF
