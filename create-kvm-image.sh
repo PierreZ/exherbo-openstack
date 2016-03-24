@@ -231,10 +231,15 @@ yes "" | make HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu- 
 
 # Enable /proc/config.gz support
 sed -i -e 's/.*CONFIG_IKCONFIG[= ].*/CONFIG_IKCONFIG=y/' .config
-# Enable btrfs support
-sed -i -e 's/.*CONFIG_BTRFS_FS[= ].*/CONFIG_BTRFS_FS=y/' .config
-sed -i -e 's/.*CONFIG_BTRFS_FS_POSIX_AC[= ].*/CONFIG_BTRFS_FS_POSIX_AC=y/' .config
 echo 'CONFIG_IKCONFIG_PROC=y' >> .config
+
+# Enable btrfs support
+sed -i -e 's/# CONFIG_BTRFS_FS is not set/CONFIG_BTRFS_FS=y/g' .config
+echo -e "CONFIG_BTRFS_FS_POSIX_ACL=y" >> .config
+echo -e "# CONFIG_BTRFS_FS_CHECK_INTEGRITY is not set" >> .config
+echo -e "# CONFIG_BTRFS_FS_RUN_SANITY_TESTS is not set" >> .config
+echo -e "# CONFIG_BTRFS_DEBUG is not set" >> .config
+echo -e "# CONFIG_BTRFS_ASSERT is not set" >> .config
 
 make -j${JOBS} HOSTCC=x86_64-pc-linux-gnu-gcc CROSS_COMPILE=x86_64-pc-linux-gnu-
 echo "make done" 
