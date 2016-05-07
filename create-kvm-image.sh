@@ -303,28 +303,11 @@ menuentry "Exherbo" {
 }
 EOF
 
-rm ${KVMROOTFS}/etc/ssh/sshd_config
-cat<<EOF > ${KVMROOTFS}/etc/ssh/sshd_config
-Port 22
-HostKey /etc/ssh/ssh_host_key
-ServerKeyBits 1024
-LoginGraceTime 600
-KeyRegenerationInterval 3600
-PermitRootLogin yes
-IgnoreRhosts yes
-IgnoreUserKnownHosts yes
-StrictModes yes
-X11Forwarding no
-PrintMotd yes
-SyslogFacility AUTH
-LogLevel INFO
-RhostsAuthentication no
-RhostsRSAAuthentication no
-RSAAuthentication yes
-PasswordAuthentication no
-PermitEmptyPasswords no
-AllowUsers root
-EOF
+sed -i "s/.*RSAAuthentication.*/RSAAuthentication yes/g" ${KVMROOTFS}/etc/ssh/sshd_config
+sed -i "s/.*PubkeyAuthentication.*/PubkeyAuthentication yes/g" ${KVMROOTFS}/etc/ssh/sshd_config
+sed -i "s/.*PasswordAuthentication.*/PasswordAuthentication no/g" ${KVMROOTFS}/etc/ssh/sshd_config
+sed -i "s/.*AuthorizedKeysFile.*/AuthorizedKeysFile\t\.ssh\/authorized_keys/g" ${KVMROOTFS}/etc/ssh/sshd_config
+sed -i "s/.*PermitRootLogin.*/PermitRootLogin no/g" ${KVMROOTFS}/etc/ssh/sshd_config
 
 curl https://github.com/PierreZ.keys > ${KVMROOTFS}/root/.ssh/authorized_keys
 
