@@ -264,6 +264,7 @@ grub-install --no-floppy --grub-mkdevicemap=${KVMROOTFS}/root/device.map --root-
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 # Enable SSH
+cat /etc/ssh/sshd_config
 systemctl enable sshd.service
 
 sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
