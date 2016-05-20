@@ -264,10 +264,9 @@ grub-install --no-floppy --grub-mkdevicemap=${KVMROOTFS}/root/device.map --root-
 
 chroot "${KVMROOTFS}" /bin/bash -ex<<EOF
 # Enable SSH
-cat /etc/ssh/sshd_config
+wget -O /etc/ssh/sshd_config https://raw.githubusercontent.com/PierreZ/exherbo-openstack/master/sshd_config
 systemctl enable sshd.service
 
-sed -i -e 's/.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
 systemd-firstboot --locale=en_US --locale-messages=en_US --timezone=Europe/Paris --hostname=exherbo --root-password=packer --setup-machine-id
 ssh-keygen -A
 
@@ -303,12 +302,6 @@ menuentry "Exherbo" {
     initrd /boot/initramfs-${KERNELVER}.img
 }
 EOF
-
-sed -i "s/.*RSAAuthentication.*/RSAAuthentication yes/g" ${KVMROOTFS}/etc/ssh/sshd_config
-sed -i "s/.*PubkeyAuthentication.*/PubkeyAuthentication yes/g" ${KVMROOTFS}/etc/ssh/sshd_config
-sed -i "s/.*PasswordAuthentication.*/PasswordAuthentication no/g" ${KVMROOTFS}/etc/ssh/sshd_config
-sed -i "s/.*AuthorizedKeysFile.*/AuthorizedKeysFile\t\.ssh\/authorized_keys/g" ${KVMROOTFS}/etc/ssh/sshd_config
-sed -i "s/.*PermitRootLogin.*/PermitRootLogin no/g" ${KVMROOTFS}/etc/ssh/sshd_config
 
 curl https://github.com/PierreZ.keys > ${KVMROOTFS}/root/.ssh/authorized_keys
 
